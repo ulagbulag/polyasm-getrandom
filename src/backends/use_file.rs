@@ -1,5 +1,6 @@
 //! Implementations that just need to read from a file
 use crate::Error;
+pub(super) use crate::utils::sys_fill_exact as utils;
 use core::{
     ffi::{CStr, c_void},
     mem::MaybeUninit,
@@ -8,9 +9,6 @@ use core::{
 
 #[cfg(not(any(target_os = "android", target_os = "linux")))]
 pub use crate::util::{inner_u32, inner_u64};
-
-#[path = "../utils/sys_fill_exact.rs"]
-pub(super) mod utils;
 
 /// For all platforms, we use `/dev/urandom` rather than `/dev/random`.
 /// For more information see the linked man pages in lib.rs.

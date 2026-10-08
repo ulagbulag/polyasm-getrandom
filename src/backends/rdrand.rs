@@ -1,4 +1,5 @@
 //! RDRAND backend for x86(-64) targets
+use crate::utils::lazy_bool::LazyBool;
 use crate::{Error, util::slice_as_uninit};
 use core::mem::{MaybeUninit, size_of};
 
@@ -113,10 +114,7 @@ fn init() -> bool {
 }
 
 fn is_rdrand_good() -> bool {
-    #[path = "../utils/lazy_bool.rs"]
-    mod lazy;
-
-    static RDRAND_GOOD: lazy::LazyBool = lazy::LazyBool::new();
+    static RDRAND_GOOD: LazyBool = LazyBool::new();
 
     RDRAND_GOOD.unsync_init(init)
 }

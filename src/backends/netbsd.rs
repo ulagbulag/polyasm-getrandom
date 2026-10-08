@@ -3,7 +3,10 @@
 //! `getrandom(2)` was introduced in NetBSD 10. To support older versions we
 //! implement our own weak linkage to it, and provide a fallback based on the
 //! KERN_ARND sysctl.
-use crate::Error;
+use crate::{
+    Error,
+    utils::{lazy_ptr::LazyPtr, sys_fill_exact as utils},
+};
 use core::{
     cmp,
     ffi::c_void,
@@ -12,9 +15,6 @@ use core::{
 };
 
 pub use crate::util::{inner_u32, inner_u64};
-
-#[path = "../utils/sys_fill_exact.rs"]
-mod utils;
 
 unsafe extern "C" fn polyfill_using_kern_arand(
     buf: *mut c_void,
@@ -57,10 +57,7 @@ fn init() -> NonNull<c_void> {
 
 #[inline]
 pub fn fill_inner(dest: &mut [MaybeUninit<u8>]) -> Result<(), Error> {
-    #[path = "../utils/lazy_ptr.rs"]
-    mod lazy;
-
-    static GETRANDOM_FN: lazy::LazyPtr<c_void> = lazy::LazyPtr::new();
+    static GETRANDOM_FN: LazyPtr<c_void> = LazyPtr::new();
 
     let fptr = GETRANDOM_FN.unsync_init(init);
     let fptr = unsafe { mem::transmute::<*mut c_void, GetRandomFn>(fptr.as_ptr()) };

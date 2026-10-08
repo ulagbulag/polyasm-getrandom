@@ -1,10 +1,8 @@
+use super::sanitizer;
 use crate::Error;
 use core::mem::MaybeUninit;
 
-mod get_errno;
-mod sanitizer;
-
-pub(crate) use get_errno::get_errno;
+pub(crate) use super::get_errno::get_errno;
 
 /// Fill a buffer by repeatedly invoking `sys_fill`.
 ///
