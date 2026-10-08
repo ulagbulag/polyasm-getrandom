@@ -2,6 +2,7 @@
 //!
 //! Arm Architecture Reference Manual for A-profile architecture:
 //! ARM DDI 0487K.a, ID032224, D23.2.147 RNDR, Random Number
+use crate::utils::lazy_bool::LazyBool;
 use crate::{
     Error,
     util::{slice_as_uninit, truncate},
@@ -69,10 +70,7 @@ fn is_rndr_available() -> bool {
 
 #[cfg(not(target_feature = "rand"))]
 fn is_rndr_available() -> bool {
-    #[path = "../utils/lazy_bool.rs"]
-    mod lazy;
-
-    static RNDR_GOOD: lazy::LazyBool = lazy::LazyBool::new();
+    static RNDR_GOOD: LazyBool = LazyBool::new();
 
     cfg_if::cfg_if! {
         if #[cfg(feature = "std")] {

@@ -1,14 +1,15 @@
 //! Implementation for Linux / Android with `/dev/urandom` fallback
-use super::use_file;
-use crate::Error;
 use core::{
     ffi::c_void,
     mem::{MaybeUninit, transmute},
     ptr::{self, NonNull},
 };
-use use_file::utils;
 
 pub use crate::util::{inner_u32, inner_u64};
+use crate::{Error, utils::lazy_ptr::LazyPtr};
+
+use super::use_file;
+use use_file::utils;
 
 type GetRandomFn = unsafe extern "C" fn(*mut c_void, libc::size_t, libc::c_uint) -> libc::ssize_t;
 
@@ -68,10 +69,7 @@ fn use_file_fallback(dest: &mut [MaybeUninit<u8>]) -> Result<(), Error> {
 
 #[inline]
 pub fn fill_inner(dest: &mut [MaybeUninit<u8>]) -> Result<(), Error> {
-    #[path = "../utils/lazy_ptr.rs"]
-    mod lazy;
-
-    static GETRANDOM_FN: lazy::LazyPtr<c_void> = lazy::LazyPtr::new();
+    static GETRANDOM_FN: LazyPtr<c_void> = LazyPtr::new();
     let fptr = GETRANDOM_FN.unsync_init(init);
 
     if fptr == NOT_AVAILABLE {

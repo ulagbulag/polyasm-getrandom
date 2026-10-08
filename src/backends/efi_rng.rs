@@ -1,13 +1,15 @@
 //! Implementation for UEFI using EFI_RNG_PROTOCOL
-use crate::Error;
 use core::{
     mem::MaybeUninit,
     ptr::{self, NonNull},
 };
+
 use r_efi::{
     efi::{BootServices, Handle},
     protocols::rng,
 };
+
+use crate::{Error, utils::lazy_ptr::LazyPtr};
 
 extern crate std;
 
@@ -92,10 +94,7 @@ fn init() -> Result<NonNull<rng::Protocol>, Error> {
 
 #[inline]
 pub fn fill_inner(dest: &mut [MaybeUninit<u8>]) -> Result<(), Error> {
-    #[path = "../utils/lazy_ptr.rs"]
-    mod lazy;
-
-    static RNG_PROTOCOL: lazy::LazyPtr<rng::Protocol> = lazy::LazyPtr::new();
+    static RNG_PROTOCOL: LazyPtr<rng::Protocol> = LazyPtr::new();
 
     let protocol = RNG_PROTOCOL.try_unsync_init(init)?;
 
